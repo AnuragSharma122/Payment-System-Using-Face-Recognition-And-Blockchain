@@ -4,16 +4,16 @@ var mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
-    first_name: {
+    firstname: {
       type: String,
       required: true,
     },
-    last_name: {
+    lastname: {
       type: String,
       required: true,
     },
     facialTemplate: {
-      type: Buffer,
+      type: Object,
       required: true,
     },
     phone: {
@@ -23,7 +23,7 @@ const userSchema = mongoose.Schema(
     },
     gender: String,
     email: String,
-    WalletAddress: String,
+    wallet: String,
   },
   { collection: "Users" }
 );
