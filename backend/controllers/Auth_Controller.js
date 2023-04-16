@@ -13,8 +13,8 @@ faceapi.env.monkeyPatch({ fetch: fetch });
 
 const matchUser = async (req, res) => {
   try {
-    const input = "./assets/image1.jpg";
-    const img = await canvas.loadImage(input);
+    const { amount, image, paid } = req.body;
+    const img = await canvas.loadImage(image);
     const inputFace = await faceapi
       .detectSingleFace(img)
       .withFaceLandmarks()
@@ -25,23 +25,14 @@ const matchUser = async (req, res) => {
     let recognizedUser = null;
     let minDistance = 0.4;
     for (let i = 0; i < users.length; i++) {
-      // const userFace = new Float32Array(
-      //   Object.values(users[i].facialTemplate)
-      // );
-      // const userFace = new Float32Array(users[i].facialTemplate);
       const userFace = new Float32Array(
         Object.values(users[i].facialTemplate.descriptor)
       );
-      // const userFace = users[i].facialTemplate.map((num) => parseFloat(num));
-      // console.log(userFace.length);
-      // console.log(inputFace.length);
       const distance = faceapi.euclideanDistance(
         userFace,
         inputFace.descriptor
       );
       console.log(`User ${i}: ${distance}`);
-
-      // Choose the user with the smallest distance to the input face as the recognized user
       if (distance < minDistance) {
         recognizedUser = users[i];
         minDistance = distance;
@@ -49,19 +40,30 @@ const matchUser = async (req, res) => {
     }
 
     if (recognizedUser) {
+      //process blockchain payment here
+      /*
+        here blockchain part will come and payment will be processed
+      */
+      //return succesfull payment
       console.log(
         `User recognized: ${recognizedUser.firstname} ${recognizedUser.lastname}`
       );
-      res.json({ message: "User recognized.", recognizedUser });
+      res.json({ message: "User recognized.",  successfull:true });
     } else {
       console.log("User not recognized.");
-      res.status(404).json({ code: 404, message: "User not recognized." });
+      res
+        .status(404)
+        .json({ code: 404, message: "User not recognized.", successfull:false });
     }
   } catch (error) {
     console.log(error);
     res
       .status(400)
-      .json({ code: 400, message: "invalid data or invalid syntax" });
+      .json({
+        code: 400,
+        message: "invalid data or invalid syntax",
+        successfull: false,
+      });
   }
 };
 

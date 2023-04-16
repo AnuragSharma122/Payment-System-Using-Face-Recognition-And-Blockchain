@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
   res.send('api working!!!!');
 });
 
-router.get("/api/matchUser", matchUser);
+router.post("/api/matchUser", matchUser);
 
 // router.post("/api/register", function (req, res, next) {
 //   res.send("respond with a resource");

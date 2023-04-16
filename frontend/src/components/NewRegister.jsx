@@ -1,5 +1,6 @@
 import React from "react";
 // import "./App.css";
+import "./Register.css";
 import { useState, useCallback, useRef } from "react";
 import axios from "axios";
 import Webcam from "react-webcam";
