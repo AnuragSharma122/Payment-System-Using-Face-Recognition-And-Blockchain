@@ -13,7 +13,7 @@ faceapi.env.monkeyPatch({ fetch: fetch });
 
 const matchUser = async (req, res) => {
   try {
-    const input = "./assets/image3.jpg";
+    const input = "./assets/image1.jpg";
     const img = await canvas.loadImage(input);
     const inputFace = await faceapi
       .detectSingleFace(img)

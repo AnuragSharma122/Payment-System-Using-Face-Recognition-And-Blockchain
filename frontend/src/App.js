@@ -1,10 +1,12 @@
 import './App.css';
 import { Register } from './register';
+import { NewRegister } from './NewRegister';
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-       < Register/>
+        {/* < Register/> */}
+        <NewRegister />
       </header>
     </div>
   );
