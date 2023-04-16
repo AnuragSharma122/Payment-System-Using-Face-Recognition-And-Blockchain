@@ -23,7 +23,7 @@ const matchUser = async (req, res) => {
     console.log("Users loaded from database");
 
     let recognizedUser = null;
-    let minDistance = 0.4;
+    let minDistance = 0.5;
     for (let i = 0; i < users.length; i++) {
       const userFace = new Float32Array(
         Object.values(users[i].facialTemplate.descriptor)

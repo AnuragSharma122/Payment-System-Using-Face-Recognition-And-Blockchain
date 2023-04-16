@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
-
+// import "./Payment.css";
 export const Payment = (props) => {
   const [showCamera, setShowCamera] = useState(false);
   const [paymentData, setPaymentData] = useState({
@@ -78,8 +78,8 @@ export const Payment = (props) => {
     );
   } else {
     return (
-      <div>
-        <h1>Payment with Face Scan</h1>
+      <div className="payment-container">
+        <h1 className="payment-heading">Payment with Face Scan</h1>
         <>
           {showCamera ? (
             <div>
@@ -88,16 +88,24 @@ export const Payment = (props) => {
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
               />
-              <button onClick={handleCapture}>Capture</button>
+              <button className="payment-button" onClick={handleCapture}>
+                Capture
+              </button>
             </div>
           ) : (
-            <button onClick={() => setShowCamera(true)}>Scan Face</button>
+            <button
+              className="payment-button"
+              onClick={() => setShowCamera(true)}
+            >
+              Scan Face
+            </button>
           )}
 
           {paymentData.image && <img src={paymentData.image} alt="Face" />}
           <div>
-            <label>Amount:</label>
+            <label className="payment-label">Amount:</label>
             <input
+              className="payment-input"
               type="number"
               value={paymentData.amount}
               onChange={(e) =>
