@@ -48,22 +48,24 @@ const matchUser = async (req, res) => {
       console.log(
         `User recognized: ${recognizedUser.firstname} ${recognizedUser.lastname}`
       );
-      res.json({ message: "User recognized.",  successfull:true });
+      res.json({ message: "User recognized.", successfull: true });
     } else {
       console.log("User not recognized.");
       res
         .status(404)
-        .json({ code: 404, message: "User not recognized.", successfull:false });
+        .json({
+          code: 404,
+          message: "User not recognized.",
+          successfull: false,
+        });
     }
   } catch (error) {
     console.log(error);
-    res
-      .status(400)
-      .json({
-        code: 400,
-        message: "invalid data or invalid syntax",
-        successfull: false,
-      });
+    res.status(400).json({
+      code: 400,
+      message: "invalid data or invalid syntax",
+      successfull: false,
+    });
   }
 };
 
