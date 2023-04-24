@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
-const { register,matchUser } = require("../controllers/Auth_Controller");
+const {
+  register,
+  matchUser,
+  getUserDetails,
+} = require("../controllers/Auth_Controller");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -16,4 +20,5 @@ router.post("/api/matchUser", matchUser);
 //   res.send("respond with a resource");
 // });
 router.post("/api/register",upload.single('image'), register);
+router.get("/api/users/:walletAddress", getUserDetails);
 module.exports = router;

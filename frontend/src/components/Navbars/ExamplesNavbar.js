@@ -53,9 +53,7 @@ export default function ExamplesNavbar() {
       <Container>
         <div className="navbar-translate">
           <NavbarBrand to="/" id="navbar-brand" tag={Link}>
-            <span>
-              IIIT KOTA{"-"}
-            </span>
+            <span>IIIT KOTA{"-"}</span>
             Payment using face recognition
           </NavbarBrand>
           <UncontrolledTooltip placement="bottom" target="navbar-brand">
@@ -151,6 +149,11 @@ export default function ExamplesNavbar() {
             <NavItem>
               <NavLink tag={Link} to="/payment">
                 Payment
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink tag={Link} to="/profile">
+                Profile
               </NavLink>
             </NavItem>
           </Nav>

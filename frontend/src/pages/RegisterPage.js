@@ -28,7 +28,7 @@ import {RegisterPopUp} from "../components/RegisterPopUp";
 import ExamplesNavbar from "../components/Navbars/ExamplesNavbar.js";
 import Footer from "../components/Footer/Footer.js";
 
-export function RegisterPage() {
+export function RegisterPage(props) {
   const [squares1to6, setSquares1to6] = React.useState("");
   const [squares7and8, setSquares7and8] = React.useState("");
   const [fullNameFocus, setFullNameFocus] = React.useState(false);

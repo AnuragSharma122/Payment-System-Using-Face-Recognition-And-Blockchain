@@ -11,6 +11,27 @@ const { Canvas, Image, ImageData, createCanvas, loadImage } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 faceapi.env.monkeyPatch({ fetch: fetch });
 
+const getUserDetails = async (req, res) => {
+  const walletAddress = req.params.walletAddress;
+  console.log("started");
+  try {
+    console.log(walletAddress);
+    const user = await User.findOne({ wallet: walletAddress });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.json({
+      firstname: user.firstname,
+      lastname: user.lastname,
+      phone: user.phone,
+      email: user.email,
+      gender: user.gender
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
 const matchUser = async (req, res) => {
   try {
     const { amount, image, paid } = req.body;
@@ -108,4 +129,5 @@ const register = async (req, res) => {
 module.exports = {
   register,
   matchUser,
+  getUserDetails,
 };
