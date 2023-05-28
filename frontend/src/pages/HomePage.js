@@ -38,22 +38,22 @@ export function HomePage() {
     };
   }, []);
   const followCursor = (event) => {
-    let posX = event.clientX - window.innerWidth / 2;
-    let posY = event.clientY - window.innerWidth / 6;
-    setSquares1to6(
-      "perspective(500px) rotateY(" +
-        posX * 0.05 +
-        "deg) rotateX(" +
-        posY * -0.05 +
-        "deg)"
-    );
-    setSquares7and8(
-      "perspective(500px) rotateY(" +
-        posX * 0.02 +
-        "deg) rotateX(" +
-        posY * -0.02 +
-        "deg)"
-    );
+    // let posX = event.clientX - window.innerWidth / 2;
+    // let posY = event.clientY - window.innerWidth / 6;
+    // setSquares1to6(
+    //   "perspective(500px) rotateY(" +
+    //     posX * 0.05 +
+    //     "deg) rotateX(" +
+    //     posY * -0.05 +
+    //     "deg)"
+    // );
+    // setSquares7and8(
+    //   "perspective(500px) rotateY(" +
+    //     posX * 0.02 +
+    //     "deg) rotateX(" +
+    //     posY * -0.02 +
+    //     "deg)"
+    // );
   };
 
   return (

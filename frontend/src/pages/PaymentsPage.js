@@ -1,4 +1,11 @@
-import React from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
+import {useNavigate } from "react-router-dom";
+import * as faceapi from "face-api.js";
 import classnames from "classnames";
 // reactstrap components
 import {
@@ -20,7 +27,6 @@ import {
   Row,
   Col,
 } from "reactstrap";
-import { useState, useCallback, useRef } from "react";
 import axios from "axios";
 import Webcam from "react-webcam";
 import ExamplesNavbar from "../components/Navbars/ExamplesNavbar.js";
@@ -34,7 +40,6 @@ export function PaymentsPage() {
   const [fullNameFocus, setFullNameFocus] = React.useState(false);
   const [emailFocus, setEmailFocus] = React.useState(false);
   const [passwordFocus, setPasswordFocus] = React.useState(false);
-
   const [showCamera, setShowCamera] = useState(false);
   const [paymentData, setPaymentData] = useState({
     amount: 0,
@@ -44,30 +49,101 @@ export function PaymentsPage() {
   const [showProcessing, setShowProcessing] = useState(false);
   const [paymentSuccessful, setPaymentSuccessful] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [enteredOtpValue, setEnteredOtpValue] = useState("");
+  const [userPhone, setUserPhone] = useState("");
   const webcamRef = useRef(null);
-  const handleCapture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [startScan, setStartScan] = useState(false);
+  const [paymentID, setPaymentID] = useState("req_RyuNuYipV7smHH");
+  const [userData, setUserData] = useState({
+    firstname: "",
+    lastname: "",
+    phone: "",
+    email: "",
+    cardnumber: "",
+    expiration: "",
+    cvv: "",
+    amount: "",
+  });
+  const navigate = useNavigate();
+  useEffect(() => {
+    const loadModels = async () => {
+      const MODEL_URL = process.env.PUBLIC_URL + "/models";
+      Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      ]).then(setIsModelLoaded(true));
+    };
+    loadModels();
+  }, []);
+
+  const captureFace = async () => {
+    if (!isModelLoaded || !webcamRef.current) {
+      if (!isModelLoaded) {
+        alert("Models not loaded!");
+      } else {
+        alert("Webcam error!");
+      }
+      return;
+    }
+    // asdfasdfadsf
+    const video = webcamRef.current.video;
+    const canvas = faceapi.createCanvasFromMedia(video);
+    const displaySize = { width: video.videoHeight, height: video.videoWidth };
+    faceapi.matchDimensions(canvas, displaySize);
+    const detections = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+    console.log(detections.descriptor);
+
     setPaymentData({
       ...paymentData,
-      image: imageSrc,
+      image: detections.descriptor,
     });
     setShowCamera(false);
-    console.log(paymentData);
-  }, [paymentData, setPaymentData]);
+  };
   //handle submit function
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    if (enteredOtpValue == otpValue) {
+      //make payment
+      // setPaymentSuccessful(true);
+      setOtpVerified(true);
+    } else {
+      setErrorMessage("OTP verification failed");
+    }
+  };
   const handlePayment = async (e) => {
     e.preventDefault();
     setShowProcessing(true);
     // Perform payment processing
-    console.log("Payment processed:", paymentData);
+    // console.log("Payment processed:", paymentData);
     try {
       const response = await axios.post(
         "http://127.0.0.1:3002/users/api/matchUser",
         paymentData
       );
-      if (response.data.successfull) {
-        setPaymentSuccessful(true);
+      // console.log(response.data);
+      if (response.data.otpSent) {
+        setOtpSent(response.data.otpSent);
+        setOtpValue(response.data.otp);
+        setUserData({
+          ...userData,
+          firstname: response.data.firstname,
+          lastname: response.data.lastname,
+          email: response.data.email,
+          phone: response.data.phone,
+          cardnumber: response.data.cardnumber,
+          expiration: response.data.expiration,
+          cvv: response.data.cvv,
+        });
       } else {
         setErrorMessage("Face does not match. Please try again.");
       }
@@ -85,6 +161,10 @@ export function PaymentsPage() {
       image: null,
       paid: false,
     });
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtpValue("");
+    setEnteredOtpValue("");
     setPaymentSuccessful(false);
     setShowProcessing(false);
     setErrorMessage(null);
@@ -98,28 +178,65 @@ export function PaymentsPage() {
       document.documentElement.removeEventListener("mousemove", followCursor);
     };
   }, []);
+  
 
-  const followCursor = (event) => {
-    let posX = event.clientX - window.innerWidth / 2;
-    let posY = event.clientY - window.innerWidth / 6;
-    setSquares1to6(
-      "perspective(500px) rotateY(" +
-        posX * 0.05 +
-        "deg) rotateX(" +
-        posY * -0.05 +
-        "deg)"
-    );
-    setSquares7and8(
-      "perspective(500px) rotateY(" +
-        posX * 0.02 +
-        "deg) rotateX(" +
-        posY * -0.02 +
-        "deg)"
+  const navigateToContacts = () => {
+    // navigate(`/https://dashboard.stripe.com/test/logs/${paymentID}`);
+    window.open(
+      `https://dashboard.stripe.com/test/logs/${paymentID}`,
+      "_blank",
+      "noreferrer"
     );
   };
+
+  const followCursor = (event) => {
+    // let posX = event.clientX - window.innerWidth / 2;
+    // let posY = event.clientY - window.innerWidth / 6;
+    // setSquares1to6(
+    //   "perspective(500px) rotateY(" +
+    //     posX * 0.05 +
+    //     "deg) rotateX(" +
+    //     posY * -0.05 +
+    //     "deg)"
+    // );
+    // setSquares7and8(
+    //   "perspective(500px) rotateY(" +
+    //     posX * 0.02 +
+    //     "deg) rotateX(" +
+    //     posY * -0.02 +
+    //     "deg)"
+    // );
+  };
+  const startPayment = async (e) => {
+    e.preventDefault();
+    setShowProcessing(true);
+    // Perform payment processing
+    // console.log("Payment processed:", paymentData);
+    try {
+      console.log(userData);
+      const response = await axios.post(
+        "http://127.0.0.1:3002/users/api/payment",
+        userData
+      );
+      console.log(response.data);
+      if (response.data.issuccesful == true) {
+        setPaymentSuccessful(true);
+        setPaymentID(response.data.payment_id);
+      } else {
+        setErrorMessage("Error occured during payment");
+      }
+    } catch (error) {
+      console.log(error);
+      setErrorMessage(
+        "An error occurred while processing payment. Please try again later."
+      );
+    } finally {
+      setShowProcessing(false);
+    }
+  }
   return (
     <>
-      <ExamplesNavbar /> 
+      <ExamplesNavbar />
       <div className="wrapper">
         <div className="page-header">
           <div className="page-header-image" />
@@ -137,15 +254,37 @@ export function PaymentsPage() {
                     id="square8"
                     style={{ transform: squares7and8 }}
                   />
-                  <Card className="card-register">
-                    <CardHeader>
-                      <CardImg
+                  <Card
+                    className="card-register"
+                    style={{
+                      display: "flex",
+                    }}
+                  >
+                    <CardHeader style={{ height: "130px" }}>
+                      {/* <CardImg
                         alt="..."
                         src={require("../assets/img/square-purple-1.png")}
-                      />
-                      <CardTitle tag="h4">Pay</CardTitle>
+                      /> */}
+                      <CardTitle
+                        tag="h2"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "130px",
+                        }}
+                      >
+                        {/* Pay */}
+                        <span style={{ color: "#DF4FC8" }}>Pay</span>
+                      </CardTitle>
                     </CardHeader>
-                    <CardBody>
+                    <CardBody
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       {paymentSuccessful ? (
                         <div>
                           <h1>Payment successful!</h1>
@@ -157,10 +296,20 @@ export function PaymentsPage() {
                           >
                             Make another payment
                           </Button>
+                          {paymentID && (
+                            <Button
+                              onClick={navigateToContacts}
+                              className="btn"
+                              color="primary"
+                              size="sm"
+                            >
+                              Check payment details
+                            </Button>
+                          )}
                         </div>
                       ) : errorMessage ? (
                         <div>
-                          <h1>Error! Face didn't Match. Please try again</h1>
+                          <h1>{errorMessage}</h1>
                           <Button
                             onClick={handleReset}
                             className="btn"
@@ -170,63 +319,200 @@ export function PaymentsPage() {
                             Try again
                           </Button>
                         </div>
-                      ) : (
+                      ) : otpVerified ? (
                         <div>
-                          <InputGroup
-                            className={classnames({
-                              "input-group-focus": fullNameFocus,
-                            })}
-                          >
-                            <Input
-                              placeholder="Amount"
-                              type="number"
-                              name="firstname"
-                              onChange={(e) =>
-                                setPaymentData({
-                                  ...paymentData,
-                                  amount: e.target.value,
-                                })
-                              }
-                              onFocus={(e) => setFullNameFocus(true)}
-                              onBlur={(e) => setFullNameFocus(false)}
-                            />
-                          </InputGroup>
-                          <InputGroup>
+                          <Form className="form" onSubmit={startPayment}>
+                            <div className="form-row">
+                              <FormGroup className="col-md-6">
+                                <Label for="inputEmail4">First Name</Label>
+                                <Input
+                                  type="text"
+                                  id="inputEmail4"
+                                  placeholder={userData.firstname}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                              <FormGroup className="col-md-6">
+                                <Label for="inputPassword4">Last Name</Label>
+                                <Input
+                                  type="text"
+                                  id="inputPassword4"
+                                  placeholder={userData.lastname}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                            </div>
+                            <div className="form-row">
+                              <FormGroup className="col-md-6">
+                                <Label for="inputEmail4">Email</Label>
+                                <Input
+                                  type="email"
+                                  id="inputEmail4"
+                                  placeholder={userData.email}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                              <FormGroup className="col-md-6">
+                                <Label for="inputPassword4">Phone</Label>
+                                <Input
+                                  type="phone"
+                                  id="inputPassword4"
+                                  placeholder={userData.phone}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                            </div>
+                            <div className="form-row">
+                              <FormGroup className="col-md-6">
+                                <Label for="inputEmail4">Card Number</Label>
+                                <Input
+                                  type="number"
+                                  id="inputEmail4"
+                                  placeholder={userData.cardnumber}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                              <FormGroup className="col-md-6">
+                                <Label for="inputPassword4">
+                                  Expiration date
+                                </Label>
+                                <Input
+                                  type="text"
+                                  id="inputPassword4"
+                                  placeholder={userData.expiration}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                            </div>
+                            <div className="form-row">
+                              <FormGroup className="col-md-3">
+                                <Label for="inputPassword4">CVV</Label>
+                                <Input
+                                  type="number"
+                                  id="inputPassword4"
+                                  placeholder={userData.cvv}
+                                  disabled="on"
+                                />
+                              </FormGroup>
+                              <FormGroup className="col-md-9">
+                                <Label for="inputPassword4">
+                                  Enter Amount (in RS)
+                                </Label>
+                                <Input
+                                  type="number"
+                                  id="inputPassword4"
+                                  placeholder="7000 RS"
+                                  onChange={(e) =>
+                                    setUserData({
+                                      ...userData,
+                                      amount: e.target.value,
+                                    })
+                                  }
+                                />
+                              </FormGroup>
+                            </div>
                             <Button
-                              // type="submit"
-                              onClick={() => setShowCamera(true)}
+                              type="submit"
                               className="btn"
                               color="primary"
                               size="sm"
                             >
-                              Scan Face
+                              Pay
                             </Button>
-                          </InputGroup>
-                          <RegisterPopUp
-                            trigger={showCamera}
-                            onCapture={handleCapture}
-                          >
-                            <Card className="card-register">
-                              <Webcam
-                                audio={false}
-                                ref={webcamRef}
-                                screenshotFormat="image/jpeg"
-                                style={{ width: "100%", height: "100%" }}
-                              />
-                            </Card>
-                          </RegisterPopUp>
-                          {showProcessing ? (
-                            <p>Processing Payment...</p>
-                          ) : (
-                            <Button
-                              type="submit"
-                              onClick={handlePayment}
-                              className="btn-round"
-                              color="primary"
-                              size="lg"
+                          </Form>
+                        </div>
+                      ) : (
+                        <div>
+                          {!otpSent ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
                             >
-                              Make Payment
-                            </Button>
+                              <InputGroup
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Button
+                                  // type="submit"
+                                  onClick={() => setShowCamera(true)}
+                                  className="btn"
+                                  color="primary"
+                                  size="sm"
+                                >
+                                  Scan Face
+                                </Button>
+                              </InputGroup>
+                              <RegisterPopUp
+                                trigger={showCamera}
+                                closeTrigger={setShowCamera}
+                                onCapture={captureFace}
+                                startScan={startScan}
+                              >
+                                <Card className="card-register">
+                                  <Webcam
+                                    audio={false}
+                                    ref={webcamRef}
+                                    screenshotFormat="image/jpeg"
+                                    style={{ width: "100%", height: "100%" }}
+                                  />
+                                </Card>
+                              </RegisterPopUp>
+                              {showProcessing ? (
+                                <p>Processing Payment...</p>
+                              ) : (
+                                <Button
+                                  type="submit"
+                                  onClick={handlePayment}
+                                  className="btn-round"
+                                  color="primary"
+                                  size="lg"
+                                >
+                                  Start Payment
+                                </Button>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              <Form className="form" onSubmit={handleOtpVerify}>
+                                <InputGroup
+                                  className={classnames({
+                                    "input-group-focus": fullNameFocus,
+                                  })}
+                                >
+                                  {/* <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                              <i className="tim-icons icon-single-02" />
+                            </InputGroupText>
+                          </InputGroupAddon> */}
+                                  <Input
+                                    placeholder="OTP"
+                                    type="number"
+                                    name="otp"
+                                    onChange={(e) =>
+                                      setEnteredOtpValue(e.target.value)
+                                    }
+                                    onFocus={(e) => setFullNameFocus(true)}
+                                    onBlur={(e) => setFullNameFocus(false)}
+                                  />
+                                </InputGroup>
+                                <Button
+                                  type="submit"
+                                  className="btn-round"
+                                  color="primary"
+                                  size="lg"
+                                >
+                                  OTP Verify
+                                </Button>
+                              </Form>
+                            </>
                           )}
                         </div>
                       )}

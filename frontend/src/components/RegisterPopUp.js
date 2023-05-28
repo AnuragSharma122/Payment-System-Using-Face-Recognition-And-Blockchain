@@ -23,16 +23,28 @@ export function RegisterPopUp(props) {
     return props.trigger ? (
       <div className="popup">
         <div className="popup-inner">
-          {props.children}
-          <InputGroup>
+          <div className="popup-inner-title">
+            {props.startScan == true && (
+              <h3>Face scan started. Please wait few moments!</h3>
+            )}
+          </div>
+          <div className="popup-inner-webcam">{props.children}</div>
+          <div className="popup-inner-buttons">
             <Button
               className="click"
               color="primary"
               onClick={(e) => props.onCapture(e)}
             >
-              Click me
+              Start scan
             </Button>
-          </InputGroup>
+            <Button
+              className="click"
+              color="primary"
+              onClick={(e) => props.closeTrigger(false)}
+            >
+              Close
+            </Button> 
+          </div>
         </div>
       </div>
     ) : (

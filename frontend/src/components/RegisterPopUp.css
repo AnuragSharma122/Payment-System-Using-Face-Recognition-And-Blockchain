@@ -5,21 +5,51 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(23, 25, 65, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .popup-inner{
+    display: flex;
+    flex-direction: column;
     position: relative;
     padding: 32px;
     width: 100%;
     max-width: 640px;
+    /* background-color: rgba(239, 12, 12, 0.4); */
     /* background-color: #fff; */
+}
+/* .popup-inner-webcam{
+    border-radius: 10%;
+    background-color: rgba(190, 255, 13, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+.popup-inner-title{
+    display: flex;
+    flex-direction: column;
+    /* background-color: rgba(0, 0, 0, 0.4); */
+    height: 30px;
+    /* width: fit-content; */
+    /* right: 50px; */
+    align-items: center;
+    justify-content: center;    
+    /* align-items: center; */
+}
+.popup-inner-buttons {
+    display: flex;
+    /* background-color: rgba(0, 0, 0, 0.4); */
+    height: 30px;
+    /* width: fit-content; */
+    right: 50px;
+    align-items: center;
+    justify-content: center;
 }
 .click{
     /* position: absolute; */
     /* top: 600px;
     */
-    left: 37%;
+    /* left: 37%; */
 }

@@ -6,6 +6,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { PaymentsPage } from "./pages/PaymentsPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { RegisterPageNew } from "./pages/RegisterPageNew";
 import "./assets/css/nucleo-icons.css";
 import "./assets/scss/blk-design-system-react.scss";
 import "./assets/demo/demo.css";
@@ -14,12 +15,12 @@ function App() {
   const [haveMetamask, sethaveMetamask] = useState(true);
   const [accountAddress, setAccountAddress] = useState('');
   const [accountBalance, setAccountBalance] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
 
   const { ethereum } = window;
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-
   useEffect(() => {
+    document.title = "Face Scan and pay";
     const { ethereum } = window;
     const checkMetamaskAvailability = async () => {
       if (!ethereum) {
@@ -75,6 +76,16 @@ function App() {
               path="/profile"
               element={
                 <ProfilePage
+                  walletAddress={accountAddress}
+                  accountBalance={accountBalance}
+                />
+              }
+            />
+            <Route
+              exact
+              path="/newRegister"
+              element={
+                <RegisterPageNew
                   walletAddress={accountAddress}
                   accountBalance={accountBalance}
                 />

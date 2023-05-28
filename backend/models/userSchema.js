@@ -12,14 +12,27 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    facialTemplate: {
-      type: Object,
+    image: {
+      type: String,
       required: true,
     },
     phone: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
+    },
+    cardnumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    expiration: {
+      type: String,
+      required: true,
+    },
+    cvv: {
+      type: String,
+      required: true,
     },
     gender: String,
     email: String,
