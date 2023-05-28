@@ -141,7 +141,7 @@ export function RegisterPage(props) {
     //generate an OTP of 4 number and send it to the number given in form
     //Generate OTP
     let otp = "";
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       otp += Math.floor(Math.random() * 10);
     }
     setOtpValue(otp);
