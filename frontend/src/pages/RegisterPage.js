@@ -132,6 +132,8 @@ export function RegisterPage(props) {
         handleReset();
       })
       .catch((err) => {
+        setMessage("User not registered! Try again");
+        handleReset();
         console.log(err);
       });
     // console.log(formData);
@@ -140,25 +142,27 @@ export function RegisterPage(props) {
     event.preventDefault();
     //generate an OTP of 4 number and send it to the number given in form
     //Generate OTP
-    let otp = "";
-    for (let i = 0; i < 6; i++) {
-      otp += Math.floor(Math.random() * 10);
-    }
+    let otp = "1234";
     setOtpValue(otp);
-    // console.log(otp);
-    axios
-      .post("http://127.0.0.1:3002/users/api/send-otp", {
-        otp: otp,
-        phone: formData.phone,
-      })
-      .then((res) => {
-        if (res.status == 200) {
-          setOtpSent(true);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    setOtpSent(true);
+    // for (let i = 0; i < 6; i++) {
+    //   otp += Math.floor(Math.random() * 10);
+    // }
+    // setOtpValue(otp);
+    // // console.log(otp);
+    // axios
+    //   .post("http://127.0.0.1:3002/users/api/send-otp", {
+    //     otp: otp,
+    //     phone: formData.phone,
+    //   })
+    //   .then((res) => {
+    //     if (res.status == 200) {
+    //       setOtpSent(true);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
   //handle input functions
   const handleInputs = (e) => {
@@ -266,7 +270,7 @@ export function RegisterPage(props) {
                                 />
                               </FormGroup>
                               <FormGroup className="col-md-6">
-                                <Label for="inputPassword4">Last Name</Label>
+                                <Label for="inputPassp[;word4">Last Name</Label>
                                 <Input
                                   placeholder="Last Name"
                                   type="text"
